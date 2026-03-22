@@ -1,13 +1,21 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 export async function POST(req: Request) {
   const { prompt } = await req.json();
 
-  const improved = prompt + `
-  
-# Improved Version:
-- Better structure
-- Clear constraints
-- More professional tone
-`;
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-  return Response.json({ result: improved });
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash", // เร็ว + ถูก
+  });
+
+  const result = await model.generateContent(`
+Improve this prompt to be more professional, structured, and clear:
+
+${prompt}
+`);
+
+  const text = result.response.text();
+
+  return Response.json({ result: text });
 }
